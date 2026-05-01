@@ -5,6 +5,7 @@ import com.fundoo.notes.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import com.fundoo.notes.dto.LoginRequest;
 
 @RestController
 @RequestMapping("/auth")
@@ -16,5 +17,9 @@ public class AuthController {
     @PostMapping("/register")
     public String register(@Valid @RequestBody RegisterRequest request) {
         return service.register(request);
+    }
+    @PostMapping("/login")
+    public String login(@RequestBody LoginRequest request) {
+        return service.login(request);
     }
 }

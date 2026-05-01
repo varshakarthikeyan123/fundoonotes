@@ -1,9 +1,12 @@
 package com.fundoo.notes.service;
 
 import com.fundoo.notes.dto.RegisterRequest;
+import com.fundoo.notes.dto.LoginRequest;
 import com.fundoo.notes.entity.User;
 import com.fundoo.notes.repository.UserRepository;
+import com.fundoo.notes.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -11,23 +14,32 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final JwtUtil jwtUtil;
 
     @Override
     public String register(RegisterRequest request) {
 
-        // check if email already exists
-        repository.findByEmail(request.getEmail())
-                .ifPresent(user -> {
-                    throw new RuntimeException("Email already registered");
-                });
-
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword()); // plain for now (BCrypt in UC5)
+        user.setPassword(encoder.encode(request.getPassword()));
 
         repository.save(user);
 
-        return "User Registered Successfully";
+        return "User Registered";
+    }
+
+    @Override
+    public String login(LoginRequest request) {
+
+        User user = repository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!encoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid password");
+        }
+
+        return jwtUtil.generateToken(user.getEmail());
     }
 }
