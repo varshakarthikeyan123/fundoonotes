@@ -15,11 +15,31 @@ public class NoteController {
 
     private final NoteService noteService;
 
+    // ✅ GET NOTES
     @GetMapping
-    public List<Note> getNotes(Authentication authentication) {
-
-        String email = (String) authentication.getPrincipal();
-
+    public List<Note> getNotes(Authentication auth) {
+        String email = (String) auth.getPrincipal();
         return noteService.getNotes(email);
+    }
+
+    // 📌 PIN
+    @PutMapping("/pin/{id}")
+    public String togglePin(@PathVariable Long id, Authentication auth) {
+        String email = (String) auth.getPrincipal();
+        return noteService.togglePin(id, email);
+    }
+
+    // 📦 ARCHIVE
+    @PutMapping("/archive/{id}")
+    public String toggleArchive(@PathVariable Long id, Authentication auth) {
+        String email = (String) auth.getPrincipal();
+        return noteService.toggleArchive(id, email);
+    }
+
+    // 🗑 DELETE
+    @DeleteMapping("/{id}")
+    public String deleteNote(@PathVariable Long id, Authentication auth) {
+        String email = (String) auth.getPrincipal();
+        return noteService.deleteNote(id, email);
     }
 }

@@ -1,4 +1,4 @@
-package com.fundoo.notes.service.impl;
+package com.fundoo.notes.service;
 
 import com.fundoo.notes.model.Note;
 import com.fundoo.notes.entity.User;
@@ -24,5 +24,62 @@ public class NoteServiceImpl implements NoteService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return noteRepository.findByUserId(user.getId());
+    }
+
+    @Override
+    public String togglePin(Long noteId, String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Note note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new RuntimeException("Note not found"));
+
+        if (!note.getUserId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        note.setPinned(!note.isPinned());
+        noteRepository.save(note);
+
+        return "Pin toggled ✅";
+    }
+
+    @Override
+    public String toggleArchive(Long noteId, String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Note note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new RuntimeException("Note not found"));
+
+        if (!note.getUserId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        note.setArchived(!note.isArchived());
+        noteRepository.save(note);
+
+        return "Archive toggled ✅";
+    }
+
+    @Override
+    public String deleteNote(Long noteId, String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Note note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new RuntimeException("Note not found"));
+
+        if (!note.getUserId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        note.setDeleted(true);
+        noteRepository.save(note);
+
+        return "Note deleted ✅";
     }
 }
